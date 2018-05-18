@@ -1,7 +1,9 @@
 Vagrant.configure(2) do |config|
   #cluster definition
+  $global_variable = 10
+  
   config.cluster.compose('dev-CDH') do |c|
-    c.nodes(4, '5.14-') do |n|
+    c.nodes(4, '5-14-') do |n|
       n.box = "ubuntu/xenial64"
       n.cpus = 1
       n.memory = 3072
