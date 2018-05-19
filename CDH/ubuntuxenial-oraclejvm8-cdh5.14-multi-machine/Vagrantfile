@@ -1,14 +1,21 @@
+$CDH_MASTER_NODES = 1
+$CDH_WORKER_NODES = 0
+
+$TIMEZONE = "Australia/Sydney"
+
 Vagrant.configure(2) do |config|
   #cluster definition
-  $global_variable = 10
-  
+
+
   config.cluster.compose('dev-CDH') do |c|
-    c.nodes(4, '5-14-') do |n|
+    c.nodes(($CDH_MASTER_NODES + $CDH_WORKER_NODES), '5-14-') do |n|
       n.box = "ubuntu/xenial64"
       n.cpus = 1
       n.memory = 3072
     end
   end
+
+  config.timezone.value = "AEST"
 
   config.hostmanager.enabled = false
   config.hostmanager.manage_host = true
@@ -22,6 +29,8 @@ Vagrant.configure(2) do |config|
       node_vm.vm.hostname = "#{node.fqdn}"
       node_vm.hostmanager.aliases = node.aliases unless node.aliases.empty?
       node_vm.vm.provision :hostmanager
+      node_vm.vm.provision :shell, :path => "os-configs.sh", :args => "#$TIMEZONE", :privileged => true
+
 
       node_vm.vm.provider "virtualbox" do |vb|
         vb.name = "#{node.boxname}"
@@ -29,6 +38,10 @@ Vagrant.configure(2) do |config|
         vb.cpus = node.cpus
         vb.linked_clone = true if Vagrant::VERSION =~ /^1.8/
       end
+
+      if Vagrant.has_plugin?("vagrant-timezone")
+          config.timezone.value = "Australia/Sydney"
+        end
     end
   end
 end
